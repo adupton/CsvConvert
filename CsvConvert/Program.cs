@@ -7,7 +7,7 @@ namespace CsvConvert
         static void Main(string[] args)
         {
             var csvToJson = new CsvToJson();
-            csvToJson.Convert();
+            var result = csvToJson.Convert("csvData.csv");
         }
     }
 }

@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System.Linq.Expressions;
 using System.Text.Json;
-using System.Threading;
 
 namespace CsvConvert
 {
-    public class CsvToJson
+    public class CsvToJson : IConvert
     {
-        public void Convert()
+        public string Convert(string dataSource) 
         {
-            var file = System.IO.File.ReadAllLines("csvData.csv");
+            if (string.IsNullOrEmpty(dataSource)) throw new ArgumentException("A valid data source is required");
+            
+            var file = System.IO.File.ReadAllLines(dataSource);
 
             var headers = file[0].Split(',')
                 .Select(x => x.Trim('\"'))
@@ -25,7 +25,7 @@ namespace CsvConvert
 
             var root = new List<Dictionary<string, object>>();
 
-            for (int rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+            foreach (var row in rows)
             {
                 var element = new Dictionary<string, object>();
 
@@ -33,22 +33,36 @@ namespace CsvConvert
                 {
                     if (!headers[headerIndex].Contains("_"))
                     {
-                        element.Add(headers[headerIndex], rows[rowIndex][headerIndex]);
+                        element.Add(headers[headerIndex], row[headerIndex]);
                     }
                     else
                     {
-                        element.Add(headers[headerIndex], "parent");
+                        var headerGroup = headers[headerIndex].Split("_");
+                        var subElement = new Dictionary<string, object>();
+                        
+                        if (element.ContainsKey(headerGroup[0]))
+                        {
+                            element.TryGetValue(headerGroup[0], out var existingSubElement);
+                            subElement = existingSubElement as Dictionary<string, object>;
+                            subElement?.Add(headerGroup[1], row[headerIndex]);
+                        }
+                        else
+                        {
+                            subElement.Add(headerGroup[1], row[headerIndex]);
+                            element.Add(headerGroup[0], subElement);
+                        }
                     }
-                    
                 }
 
                 root.Add(element);
             }
 
-            var result = JsonSerializer.Serialize(root);
+            return JsonSerializer.Serialize(root, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
 
         }
+
     }
-
-
 }
