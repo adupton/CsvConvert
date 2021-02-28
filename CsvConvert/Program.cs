@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using CsvConvert.Converters.Factory;
 
 namespace CsvConvert
@@ -22,6 +23,8 @@ namespace CsvConvert
 
                 var converter = new ConverterFactory().GetConverter(converterType);
                 var result = converter.Convert(dataSource);
+
+                Console.WriteLine(result);
             }
         }
 
