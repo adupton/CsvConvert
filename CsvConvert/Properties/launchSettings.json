@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CsvConvert": {
+      "commandName": "Project",
+      "commandLineArgs": "csvData.csv csvToJson"
+    }
+  }
+}
